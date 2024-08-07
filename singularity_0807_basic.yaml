@@ -1,0 +1,26 @@
+description: SSH Singularity
+
+target:
+  service: sing
+  name: GenAI-Shared-UKSouth
+  workspace_name: synthetic-datagen-ws-wus3
+
+environment:
+  image: nvidia/pytorch:24.06-py3
+  registry: nvcr.io
+
+code:
+  # local directory of the code. this will be uploaded to the server.
+  # $CONFIG_DIR is expanded to the directory of this config file
+  local_dir: $CONFIG_DIR
+
+jobs:
+- name: megatron_lm_nvcr
+  sla_tier: premium  # Default: premium
+  execution_mode: basic  # Default: basic
+  sku: G1
+  priority: high
+  process_count_per_node: 1
+  command:
+    - echo "Hello World"
+    - sleep infinity
