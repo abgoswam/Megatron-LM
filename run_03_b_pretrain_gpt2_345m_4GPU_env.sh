@@ -5,7 +5,7 @@ set -e #This command tells the shell to exit immediately if any command it runs 
 
 export CUDA_DEVICE_MAX_CONNECTIONS=1
 
-GPUS_PER_NODE=8
+GPUS_PER_NODE=4
 # Change for multinode config
 MASTER_ADDR=localhost
 MASTER_PORT=6000
@@ -40,7 +40,7 @@ DISTRIBUTED_ARGS=(
 
 GPT_MODEL_ARGS=(
     --num-layers 24 
-    --hidden-size 1024 
+    --hidden-size ${HIDDEN_SIZE} 
     --num-attention-heads 16 
     --seq-length ${SEQ_LENGTH} 
     --max-position-embeddings ${MAX_POSITION_EMBEDDINGS} 
@@ -65,7 +65,7 @@ TRAINING_ARGS=(
 
 MODEL_PARALLEL_ARGS=(
 	--tensor-model-parallel-size 8 
-	--pipeline-model-parallel-size 16 
+	--pipeline-model-parallel-size 1 
 )
 
 DATA_ARGS=(

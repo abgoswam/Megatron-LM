@@ -3,7 +3,7 @@ description: SSH Singularity
 target:
   service: sing
   name: GenAI-Shared-UKSouth
-  workspace_name: synthetic-datagen-ws-wus3
+  workspace_name: synthetic-datagen-ws-wus3 #Singularity-GenAI-WS-UKSouth #synthetic-datagen-ws-wus3
 
 environment:
   image: nvidia/pytorch:24.06-py3

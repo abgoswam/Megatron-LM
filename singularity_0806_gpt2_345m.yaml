@@ -2,7 +2,7 @@ description: SSH Singularity
 
 target:
   service: sing
-  name: GenAI-Shared-UKSouth #GenAI-Shared-UKSouth #aims-sing-a100-wus3 #GenAI-Shared-UKSouth # aims-sing-res-wus3-02 #aims-sing-a100-wus3
+  name: aims-sing-a100-wus3 #GenAI-Shared-UKSouth #GenAI-Shared-UKSouth #aims-sing-a100-wus3 #GenAI-Shared-UKSouth # aims-sing-res-wus3-02 #aims-sing-a100-wus3
   workspace_name: synthetic-datagen-ws-wus3
 
 environment:
@@ -43,16 +43,28 @@ storage:
     mount_dir: /mnt/outputsynth
 
 env_defaults:
-  SEQ_LENGTH: 1024
-  MAX_POSITION_EMBEDDINGS: 1024
+  H: 1024
+  # S: 1024
+  # S: 2048
+  S: 4096
+  # S: 8192
+  # S: 16384
+  # S: 32768
+  # S: 65536
+  # S: 131072
+  # E: 4096
+  # E: 8192
+  # E: 16384
+  E: 32768
+
 
 jobs:
-- name: megatron_lm_gpt2_345m_${MAX_POSITION_EMBEDDINGS}
+- name: megatron_lm_gpt_H${H}_S${S}_E${E}
   sla_tier: premium  # Default: premium
   execution_mode: basic  # Default: basic
   # sku: G1
-  # sku: G4
-  sku: G8
+  sku: 80G4
+  # sku: 80G8
   # sku: 40000000000G8
   # sku: 40G1-A100
   # sku: 40G8-A100-NvLink
@@ -63,9 +75,9 @@ jobs:
   command:
     - export PATH=$$HOME/.local/bin/:$$PATH
     - export OUTPUT_DIR=$$AMLT_OUTPUT_DIR/
-    - export SEQ_LENGTH=$SEQ_LENGTH
-    - export MAX_POSITION_EMBEDDINGS=$MAX_POSITION_EMBEDDINGS
-    # - bash run_01_pretrain_gpt2_345m_1GPU.sh
-    # - bash run_02_pretrain_gpt2_345m_8GPU.sh
-    # - bash run_03_pretrain_gpt2_345m_8GPU_env.sh
-    - bash run_03_a_pretrain_gpt2_345m_1GPU_env.sh
+    - export HIDDEN_SIZE=$H
+    - export SEQ_LENGTH=$S
+    - export MAX_POSITION_EMBEDDINGS=$E
+    # - bash run_03_a_pretrain_gpt2_345m_1GPU_env.sh
+    - bash run_03_b_pretrain_gpt2_345m_4GPU_env.sh
+    # - bash run_03_c_pretrain_gpt2_345m_8GPU_env.sh
