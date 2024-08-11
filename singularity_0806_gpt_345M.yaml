@@ -2,7 +2,7 @@ description: SSH Singularity
 
 target:
   service: sing
-  name: aims-sing-a100-wus3 #GenAI-Shared-UKSouth #GenAI-Shared-UKSouth #aims-sing-a100-wus3 #GenAI-Shared-UKSouth # aims-sing-res-wus3-02 #aims-sing-a100-wus3
+  name: GenAI-Shared-UKSouth #aims-sing-a100-wus3 #GenAI-Shared-UKSouth #GenAI-Shared-UKSouth #aims-sing-a100-wus3 #GenAI-Shared-UKSouth # aims-sing-res-wus3-02 #aims-sing-a100-wus3
   workspace_name: synthetic-datagen-ws-wus3
 
 environment:
@@ -55,7 +55,12 @@ env_defaults:
   # E: 4096
   # E: 8192
   # E: 16384
-  E: 32768
+  # E: 32768
+  # E: 65536
+  # E: 131072
+  # E: 262144
+  # E: 524288
+  E: 1048576
 
 
 jobs:
@@ -63,8 +68,8 @@ jobs:
   sla_tier: premium  # Default: premium
   execution_mode: basic  # Default: basic
   # sku: G1
-  sku: 80G4
-  # sku: 80G8
+  # sku: 80G4
+  sku: 80G8
   # sku: 40000000000G8
   # sku: 40G1-A100
   # sku: 40G8-A100-NvLink
@@ -79,5 +84,5 @@ jobs:
     - export SEQ_LENGTH=$S
     - export MAX_POSITION_EMBEDDINGS=$E
     # - bash run_03_a_pretrain_gpt2_345m_1GPU_env.sh
-    - bash run_03_b_pretrain_gpt2_345m_4GPU_env.sh
-    # - bash run_03_c_pretrain_gpt2_345m_8GPU_env.sh
+    # - bash run_03_b_pretrain_gpt2_345m_4GPU_env.sh
+    - bash run_03_c_pretrain_gpt2_345m_8GPU_env.sh
