@@ -2,23 +2,42 @@ description: SSH Singularity
 
 target:
   service: sing
-  name: GenAI-Shared-UKSouth
+  name: aims-sing-a100-wus3 #GenAI-Shared-UKSouth
   workspace_name: synthetic-datagen-ws-wus3 #Singularity-GenAI-WS-UKSouth #synthetic-datagen-ws-wus3
 
 environment:
   image: nvidia/pytorch:24.06-py3
   registry: nvcr.io
+  setup:
+  - pip list
+  - echo 'Above is packages before launch cmd'
+  - nvcc --version
+  - echo "export PATH=$$PATH:$$HOME/.local/bin" >> ~/.bashrc && source ~/.bashrc
+  - mkdir -p ~/.cache/huggingface && echo -n "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" > ~/.cache/huggingface/token
+  - pip install gpustat
+  - pip list
+  - echo "setup done"
 
 code:
   # local directory of the code. this will be uploaded to the server.
   # $CONFIG_DIR is expanded to the directory of this config file
   local_dir: $CONFIG_DIR
 
+storage:
+  synthdatastore:
+    storage_account_name: syntheticpipelinewus2
+    container_name: datastore
+    mount_dir: /mnt/synthdatastore
+  outputsynth:
+    storage_account_name: syntheticdatag6275770601
+    container_name: azureml-blobstore-b4c46be1-7692-48a4-afd0-b6734d6c4b67
+    mount_dir: /mnt/outputsynth
+
 jobs:
-- name: megatron_lm_nvcr
+- name: megatron_lm_nvcr_debug
   sla_tier: premium  # Default: premium
   execution_mode: basic  # Default: basic
-  sku: G1
+  sku: 80G4
   priority: high
   process_count_per_node: 1
   command:
