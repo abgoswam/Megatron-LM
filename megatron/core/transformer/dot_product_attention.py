@@ -100,7 +100,17 @@ class DotProductAttention(MegatronModule):
             "Packed sequence is not supported by DotProductAttention."
             "Please use TEDotProductAttention instead."
         )
+        
+        allocated_so_far = 0
+        debug = True
+        def log_memory_usage(step: str, prev = 0):
+            allocated = torch.cuda.memory_allocated()
+            reserved = torch.cuda.memory_reserved()
+            if debug: 
+                print(f"[{step}] Allocated: {allocated / 1024**2:.2f} MB, Reserved: {reserved / 1024**2:.2f} MB, newly allocated: {(allocated - prev) / 1024**2:.2f} MB")
+            return allocated
 
+        allocated_so_far = log_memory_usage("Start")
         # ===================================
         # Raw attention scores. [b, n/p, s, s]
         # ===================================
@@ -119,6 +129,8 @@ class DotProductAttention(MegatronModule):
                 self.num_attention_heads_per_partition // self.num_query_groups_per_partition, dim=2
             )
 
+        allocated_so_far = log_memory_usage("After repeat_interleave", allocated_so_far)
+
         # [b, np, sq, sk]
         output_size = (
             query.size(1),
@@ -135,10 +147,14 @@ class DotProductAttention(MegatronModule):
         # [sk, b, np, hn] -> [sk, b * np, hn]
         key = key.view(output_size[3], output_size[0] * output_size[1], -1)
 
+        allocated_so_far = log_memory_usage("After reshape and view", allocated_so_far)
+
         # preallocting input tensor: [b * np, sq, sk]
         matmul_input_buffer = parallel_state.get_global_memory_buffer().get_tensor(
             (output_size[0] * output_size[1], output_size[2], output_size[3]), query.dtype, "mpu",
         )
+
+        allocated_so_far = log_memory_usage("after creating matmul input buffer", allocated_so_far)
 
         # Raw attention scores. [b * np, sq, sk]
         matmul_result = torch.baddbmm(
@@ -159,6 +175,8 @@ class DotProductAttention(MegatronModule):
         # attention scores and attention mask [b, np, sq, sk]
         attention_probs: Tensor = self.scale_mask_softmax(attention_scores, attention_mask)
 
+        allocated_so_far = log_memory_usage("After scale_mask_softmax", allocated_so_far)
+
         # This is actually dropping out entire tokens to attend to, which might
         # seem a bit unusual, but is taken from the original Transformer paper.
 
@@ -167,6 +185,8 @@ class DotProductAttention(MegatronModule):
                 attention_probs = self.attention_dropout(attention_probs)
         else:
             attention_probs = self.attention_dropout(attention_probs)
+
+        allocated_so_far = log_memory_usage("After attention_dropout", allocated_so_far)
 
         # =========================
         # Context layer. [sq, b, hp]
@@ -192,6 +212,8 @@ class DotProductAttention(MegatronModule):
         # matmul: [b * np, sq, hn]
         context = torch.bmm(attention_probs, value.transpose(0, 1))
 
+        allocated_so_far = log_memory_usage("After context computation", allocated_so_far)
+
         # change view [b, np, sq, hn]
         context = context.view(*output_size)
 
@@ -202,4 +224,5 @@ class DotProductAttention(MegatronModule):
         new_context_shape = context.size()[:-2] + (self.hidden_size_per_partition,)
         context = context.view(*new_context_shape)
 
+        allocated_so_far= log_memory_usage("End", allocated_so_far)
         return context

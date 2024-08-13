@@ -2,7 +2,7 @@ description: SSH Singularity
 
 target:
   service: sing
-  name: GenAI-Shared-UKSouth #aims-sing-a100-wus3 #GenAI-Shared-UKSouth #GenAI-Shared-UKSouth #aims-sing-a100-wus3 #GenAI-Shared-UKSouth # aims-sing-res-wus3-02 #aims-sing-a100-wus3
+  name: aims-sing-a100-wus3 #GenAI-Shared-UKSouth #aims-sing-a100-wus3 #GenAI-Shared-UKSouth #GenAI-Shared-UKSouth #aims-sing-a100-wus3 #GenAI-Shared-UKSouth # aims-sing-res-wus3-02 #aims-sing-a100-wus3
   workspace_name: synthetic-datagen-ws-wus3
 
 environment:
@@ -43,7 +43,13 @@ storage:
     mount_dir: /mnt/outputsynth
 
 env_defaults:
+  # ===== GPUS_PER_NODE =====
+  G: 4
+  # G: 8
+  # ====== HIDDEN_SIZE =======
   H: 1024
+  # H: 3072
+  # ====== SEQ_LENGTH =========
   # S: 1024
   # S: 2048
   S: 4096
@@ -52,7 +58,8 @@ env_defaults:
   # S: 32768
   # S: 65536
   # S: 131072
-  # E: 4096
+  # ======= MAX_POSITION_EMBEDDINGS ======
+  E: 4096
   # E: 8192
   # E: 16384
   # E: 32768
@@ -60,16 +67,16 @@ env_defaults:
   # E: 131072
   # E: 262144
   # E: 524288
-  E: 1048576
+  # E: 1048576
 
 
 jobs:
-- name: megatron_lm_gpt_H${H}_S${S}_E${E}
+- name: megatron_lm_gpt_G${G}_H${H}_S${S}_E${E}
   sla_tier: premium  # Default: premium
   execution_mode: basic  # Default: basic
   # sku: G1
-  # sku: 80G4
-  sku: 80G8
+  sku: 80G${G}
+  # sku: 80G8
   # sku: 40000000000G8
   # sku: 40G1-A100
   # sku: 40G8-A100-NvLink
@@ -83,6 +90,9 @@ jobs:
     - export HIDDEN_SIZE=$H
     - export SEQ_LENGTH=$S
     - export MAX_POSITION_EMBEDDINGS=$E
+    - export MAX_POSITION_EMBEDDINGS=$E
+    - export GPUS_PER_NODE=$G
     # - bash run_03_a_pretrain_gpt2_345m_1GPU_env.sh
     # - bash run_03_b_pretrain_gpt2_345m_4GPU_env.sh
-    - bash run_03_c_pretrain_gpt2_345m_8GPU_env.sh
+    # - bash run_03_c_pretrain_gpt2_345m_8GPU_env.sh
+    - bash run_03_d_pretrain_gpt.sh
