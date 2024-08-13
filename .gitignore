@@ -1,3 +1,6 @@
+tensorboard_logs/
+my-gpt2_text_document/
+events.out.tfevents.*
 __pycache__
 *.so
 build
