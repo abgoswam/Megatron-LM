@@ -47,7 +47,8 @@ env_defaults:
   G: 4
   # G: 8
   # ====== HIDDEN_SIZE =======
-  H: 3072
+  H: 1024
+  # H: 3072
   # ====== SEQ_LENGTH =========
   # S: 1024
   # S: 2048
@@ -88,7 +89,6 @@ jobs:
     - export OUTPUT_DIR=$$AMLT_OUTPUT_DIR/
     - export HIDDEN_SIZE=$H
     - export SEQ_LENGTH=$S
-    - export MAX_POSITION_EMBEDDINGS=$E
     - export MAX_POSITION_EMBEDDINGS=$E
     - export GPUS_PER_NODE=$G
     # - bash run_03_a_pretrain_gpt2_345m_1GPU_env.sh
