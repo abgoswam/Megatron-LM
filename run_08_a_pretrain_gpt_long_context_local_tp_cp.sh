@@ -6,12 +6,12 @@ set -e #This command tells the shell to exit immediately if any command it runs 
 export CUDA_DEVICE_MAX_CONNECTIONS=1
 
 # local vars. should be set by amulet config.
-GPUS_PER_NODE=1
+GPUS_PER_NODE=4
 HIDDEN_SIZE=128
-SEQ_LENGTH=128
+SEQ_LENGTH=4096
 MAX_POSITION_EMBEDDINGS=${SEQ_LENGTH}
-TP=1
-CP=1
+TP=2
+CP=2
 BASE_DIR="/mnt/synthdatastore/agoswami"
 DATA_DIR="/mnt/synthdatastore/agoswami/my_long_corpus"
 
@@ -107,7 +107,7 @@ EVAL_AND_LOGGING_ARGS=(
     --log-interval 100
     --save-interval 10000 
     --eval-interval 1000 
-    --save $CHECKPOINT_PATH 
+    # --save $CHECKPOINT_PATH 
     --load $CHECKPOINT_PATH 
     --eval-iters 0 #10
     --tensorboard-dir $TENSORBOARD_LOGS_PATH 

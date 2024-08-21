@@ -3,6 +3,7 @@ my-gpt2_text_document/
 events.out.tfevents.*
 iter_*
 latest_checkpointed_iteration.txt
+output_logs
 
 # folder contains preprocessed data.
 my_long_corpus/ 
