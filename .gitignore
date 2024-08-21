@@ -1,13 +1,11 @@
 tensorboard_logs/
 my-gpt2_text_document/
 events.out.tfevents.*
+iter_*
+latest_checkpointed_iteration.txt
 
 # folder contains preprocessed data.
 my_long_corpus/ 
-
-# folder havent been able to delete.
-long_corpus_gpt2/ 
-
 
 __pycache__
 *.so
