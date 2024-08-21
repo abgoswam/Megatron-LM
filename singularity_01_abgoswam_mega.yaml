@@ -2,7 +2,7 @@ description: SSH Singularity
 
 target:
   service: sing
-  name: GenAI-Shared-UKSouth #aims-sing-a100-wus3 #GenAI-Shared-UKSouth
+  name: aims-sing-a100-wus3 #GenAI-Shared-UKSouth #aims-sing-a100-wus3 #GenAI-Shared-UKSouth
   workspace_name: synthetic-datagen-ws-wus3 #Singularity-GenAI-WS-UKSouth #synthetic-datagen-ws-wus3
 
 environment:
@@ -47,23 +47,8 @@ storage:
 
 env_defaults:
   # ===== GPUS_PER_NODE =====
-  # G: 4
-  G: 8
-  # ====== HIDDEN_SIZE =======
-  # H: 1024
-  H: 3072
-  # ====== SEQ_LENGTH =========
-  # S: 1024
-  # S: 2048
-  # S: 4096
-  # S: 8192
-  # S: 16384
-  # S: 32768
-  # S: 65536
-  # S: 131072
-  S: 262144
-
-
+  G: 4
+  # G: 8
 
 jobs:
 - name: megatron_lm_nvcr_debug_G${G}
