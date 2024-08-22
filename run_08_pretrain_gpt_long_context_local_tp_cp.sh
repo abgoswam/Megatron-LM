@@ -6,11 +6,11 @@ set -e #This command tells the shell to exit immediately if any command it runs 
 export CUDA_DEVICE_MAX_CONNECTIONS=1
 
 # local vars. should be set by amulet config.
-GPUS_PER_NODE=4
+GPUS_PER_NODE=2
 HIDDEN_SIZE=128
 SEQ_LENGTH=4096
 MAX_POSITION_EMBEDDINGS=${SEQ_LENGTH}
-TP=2
+TP=1
 CP=2
 BASE_DIR="/mnt/synthdatastore/agoswami"
 DATA_DIR="/mnt/synthdatastore/agoswami/my_long_corpus"

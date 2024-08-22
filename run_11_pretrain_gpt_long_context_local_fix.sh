@@ -5,46 +5,10 @@ set -e #This command tells the shell to exit immediately if any command it runs 
 
 export CUDA_DEVICE_MAX_CONNECTIONS=1
 
-# local vars. should be set by amulet config.
-# GPUS_PER_NODE=1
-# HIDDEN_SIZE=128
-# SEQ_LENGTH=128
-# MAX_POSITION_EMBEDDINGS=${SEQ_LENGTH}
-# TP=1
-# CP=1
-# BASE_DIR="/mnt/synthdatastore/agoswami"
-# DATA_DIR="/mnt/synthdatastore/agoswami/my_long_corpus"
-
-# Change for multinode config
+GPUS_PER_NODE=2
+NUM_NODES=1
 MASTER_ADDR=localhost
 MASTER_PORT=6000
-NUM_NODES=1
-NODE_RANK=0
-WORLD_SIZE=$(($GPUS_PER_NODE*$NUM_NODES))
-
-if [ -z "$CHECKPOINT_PATH" ]; then
-  CHECKPOINT_PATH="${BASE_DIR}/checkpoint_saving/ft_$(date +%F-%H%M.%S)"
-fi
-
-if [ -z "$TENSORBOARD_LOGS_PATH" ]; then
-  TENSORBOARD_LOGS_PATH="${BASE_DIR}/tensorboard_logs/ft_$(date +%F-%H%M.%S)"
-fi
-
-echo "CHECKPOINT_PATH:$CHECKPOINT_PATH"
-echo "TENSORBOARD_LOGS_PATH:$TENSORBOARD_LOGS_PATH"
-echo "OUTPUT_DIR:$OUTPUT_DIR"
-echo "DATA_DIR:$DATA_DIR"
-echo "SEQ_LENGTH:$SEQ_LENGTH"
-echo "MAX_POSITION_EMBEDDINGS:$MAX_POSITION_EMBEDDINGS"
-echo "GPUS_PER_NODE:$GPUS_PER_NODE"
-echo "AMLT_OUTPUT_DIR:$AMLT_OUTPUT_DIR"
-echo "AMLT_DATA_DIR:$AMLT_DATA_DIR"
-
-VOCAB_FILE="./gpt2-vocab.json"
-MERGE_FILE="./gpt2-merges.txt"
-
-DATA_PATH="${DATA_DIR}/my_long_corpus_${MAX_POSITION_EMBEDDINGS}_gpt2_text_document"
-
 DISTRIBUTED_ARGS=(
     --nproc_per_node $GPUS_PER_NODE 
     --nnodes $NUM_NODES 
@@ -52,8 +16,13 @@ DISTRIBUTED_ARGS=(
     --master_port $MASTER_PORT
 )
 
+HIDDEN_SIZE=128
+# SEQ_LENGTH=131072
+SEQ_LENGTH=262144
+# SEQ_LENGTH=524288
+# SEQ_LENGTH=1048576
+MAX_POSITION_EMBEDDINGS=${SEQ_LENGTH}
 GPT_MODEL_ARGS=(
-    # --transformer-impl local # local will not work for RMSNorm
     --transformer-impl transformer_engine
     --normalization RMSNorm
     --num-layers 24 
@@ -65,6 +34,27 @@ GPT_MODEL_ARGS=(
     --rotary-percent 1.0
     --rotary-base 1000000
     --swiglu
+)
+
+TP=1
+CP=2
+MODEL_PARALLEL_ARGS=(
+    --context-parallel-size ${CP}
+    --tensor-model-parallel-size ${TP}
+    --pipeline-model-parallel-size 1
+)
+
+DATA_DIR="/mnt/synthdatastore/agoswami/my_long_corpus"
+DATA_PATH="${DATA_DIR}/my_long_corpus_${MAX_POSITION_EMBEDDINGS}_gpt2_text_document"
+VOCAB_FILE="./gpt2-vocab.json"
+MERGE_FILE="./gpt2-merges.txt"
+
+DATA_ARGS=(
+    --data-path $DATA_PATH 
+    --vocab-file $VOCAB_FILE 
+    --merge-file $MERGE_FILE 
+    --split 949,50,1
+    --no-create-attention-mask-in-dataloader
 )
 
 TRAINING_ARGS=(
@@ -90,27 +80,14 @@ TRAINING_ARGS=(
     # --recompute-num-layers 1 
 )
 
-MODEL_PARALLEL_ARGS=(
-    --context-parallel-size ${CP}
-    --tensor-model-parallel-size ${TP}
-	--pipeline-model-parallel-size 1
-)
-
-DATA_ARGS=(
-    --data-path $DATA_PATH 
-    --vocab-file $VOCAB_FILE 
-    --merge-file $MERGE_FILE 
-    --split 949,50,1
-)
-
 EVAL_AND_LOGGING_ARGS=(
     --log-interval 100
     --save-interval 10000 
     --eval-interval 1000 
-    --save $CHECKPOINT_PATH 
-    --load $CHECKPOINT_PATH 
     --eval-iters 0 #10
-    --tensorboard-dir $TENSORBOARD_LOGS_PATH 
+    # --save $CHECKPOINT_PATH 
+    # --load $CHECKPOINT_PATH 
+    # --tensorboard-dir $TENSORBOARD_LOGS_PATH 
 )
 
 # GPU==1
