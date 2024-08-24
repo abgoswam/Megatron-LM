@@ -2,7 +2,8 @@ description: SSH Singularity
 
 target:
   service: sing
-  name: GenAI-Shared-UKSouth #aims-sing-a100-wus3 #GenAI-Shared-UKSouth #aims-sing-a100-wus3 #GenAI-Shared-UKSouth #GenAI-Shared-UKSouth #aims-sing-a100-wus3 #GenAI-Shared-UKSouth # aims-sing-res-wus3-02 #aims-sing-a100-wus3
+  name: GenAI-Shared-UKSouth
+  # name: aims-sing-a100-wus3
   workspace_name: synthetic-datagen-ws-wus3
 
 environment:
@@ -25,6 +26,7 @@ environment:
     - mkdir -p ~/.cache/huggingface && echo -n "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" > ~/.cache/huggingface/token
     - pip install gpustat
     - pip list
+    - ls -lhR
     - echo "setup done"
 
 code:
@@ -49,8 +51,8 @@ env_defaults:
   # G: 4
   G: 8
   # ====== HIDDEN_SIZE =======
-  # H: 1024
-  H: 3072
+  H: 1024
+  # H: 3072
   # ====== SEQ_LENGTH =========
   # S: 1024
   # S: 2048
@@ -62,9 +64,8 @@ env_defaults:
   # S: 131072
   S: 262144
   # ====== TP / CP =========
-  TP: 2
+  TP: 4
   CP: 2
-
 
 
 jobs:
@@ -83,13 +84,11 @@ jobs:
   process_count_per_node: 1
   command:
     - export PATH=$$HOME/.local/bin/:$$PATH
-    - export OUTPUT_DIR=$$AMLT_OUTPUT_DIR/
-    - export GPUS_PER_NODE=$G
-    - export HIDDEN_SIZE=$H
-    - export SEQ_LENGTH=$S
-    - export MAX_POSITION_EMBEDDINGS=$S
-    - export DATA_DIR=/mnt/synthdatastore/agoswami/my_long_corpus
-    - ls -lh $$DATA_DIR/
+    - export GPUS_PER_NODE=${G}
+    - export HIDDEN_SIZE=${H}
+    - export SEQ_LENGTH=${S}
+    - export CP=${CP}
+    - export TP=${TP}
     # - bash run_03_a_pretrain_gpt2_345m_1GPU_env.sh
     # - bash run_03_b_pretrain_gpt2_345m_4GPU_env.sh
     # - bash run_03_c_pretrain_gpt2_345m_8GPU_env.sh
@@ -98,4 +97,5 @@ jobs:
     # - bash run_03_g_pretrain_gpt_long_context.sh
     # - bash run_04_pretrain_gpt_long_context.sh
     # - bash run_05_pretrain_gpt_long_context_bs1.sh
-    - bash run_05_pretrain_gpt_long_context_bs1.sh
+    # - bash run_05_pretrain_gpt_long_context_bs1.sh
+    - bash _scripts_trials_02/run_12_pretrain_gpt_long_context_amlt_fix.sh
