@@ -97,18 +97,18 @@ EVAL_AND_LOGGING_ARGS=(
 #     ${DATA_ARGS[@]} \
 #     ${EVAL_AND_LOGGING_ARGS[@]}
 
-# # > 1 GPU
-# torchrun ${DISTRIBUTED_ARGS[@]} pretrain_gpt.py \
-#     ${GPT_MODEL_ARGS[@]} \
-#     ${TRAINING_ARGS[@]} \
-#     ${MODEL_PARALLEL_ARGS[@]} \
-#     ${DATA_ARGS[@]} \
-#     ${EVAL_AND_LOGGING_ARGS[@]}
-
-# > 1 Nodes
-torchrun --nproc_per_node=8 --nnodes=2 --node_rank=0 --master_port=6105 --master_addr=node-0 --rdzv_id=f4694954-bb45-495b-9452-789e6028374a --rdzv_backend=c10d --rdzv_endpoint=node-0:6105 pretrain_gpt.py \
+# > 1 GPU (1 Node)
+torchrun ${DISTRIBUTED_ARGS[@]} pretrain_gpt.py \
     ${GPT_MODEL_ARGS[@]} \
     ${TRAINING_ARGS[@]} \
     ${MODEL_PARALLEL_ARGS[@]} \
     ${DATA_ARGS[@]} \
     ${EVAL_AND_LOGGING_ARGS[@]}
+
+# # > 1 Nodes
+# torchrun --nproc_per_node=8 --nnodes=2 --node_rank=0 --master_port=6105 --master_addr=node-0 --rdzv_id=f4694954-bb45-495b-9452-789e6028374a --rdzv_backend=c10d --rdzv_endpoint=node-0:6105 pretrain_gpt.py \
+#     ${GPT_MODEL_ARGS[@]} \
+#     ${TRAINING_ARGS[@]} \
+#     ${MODEL_PARALLEL_ARGS[@]} \
+#     ${DATA_ARGS[@]} \
+#     ${EVAL_AND_LOGGING_ARGS[@]}
