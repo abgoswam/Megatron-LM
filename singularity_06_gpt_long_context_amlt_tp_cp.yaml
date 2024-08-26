@@ -48,8 +48,8 @@ storage:
 
 env_defaults:
   # ===== NUM_NODES =====
-  NN: 1
-  # NN: 2
+  # NN: 1
+  NN: 2
   # ===== GPUS_PER_NODE =====
   # G: 4
   G: 8
@@ -77,8 +77,8 @@ jobs:
 - name: megatron_lm_gpt_NN${NN}_G${G}_H${H}_S${S}_TP${TP}_CP${CP}
   sla_tier: premium  # Default: premium
   execution_mode: basic  # Default: basic
-  sku: ${NN}x80G${G}
-  # sku: ${NN}x80G${G}-A100-IB-NvLink # use for multinode
+  # sku: ${NN}x80G${G}
+  sku: ${NN}x80G${G}-A100-IB-NvLink # use for multinode
   # sku: ${NN}x80G${G}-A100-NvLink
   # sku: G1
   # sku: 80G${G}

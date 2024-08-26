@@ -7,13 +7,18 @@ export CUDA_DEVICE_MAX_CONNECTIONS=1
 
 # GPUS_PER_NODE=2
 # NUM_NODES=1
-MASTER_ADDR=localhost
+MASTER_ADDR=node-0
 MASTER_PORT=6000
+RDZV_ID=f4694954-bb45-495b-9452-789e6028374a
 DISTRIBUTED_ARGS=(
     --nproc_per_node $GPUS_PER_NODE 
     --nnodes $NUM_NODES 
     --master_addr $MASTER_ADDR 
     --master_port $MASTER_PORT
+    --node_rank 0
+    --rdzv_id $RDZV_ID
+    --rdzv_backend c10d
+    --rdzv_endpoint $MASTER_ADDR:$MASTER_PORT
 )
 
 # HIDDEN_SIZE=128
