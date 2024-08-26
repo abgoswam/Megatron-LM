@@ -2,8 +2,8 @@ description: SSH Singularity
 
 target:
   service: sing
-  name: GenAI-Shared-UKSouth
-  # name: aims-sing-a100-wus3
+  name: GenAI-Shared-UKSouth # G8
+  # name: aims-sing-a100-wus3  # G4
   workspace_name: synthetic-datagen-ws-wus3
 
 environment:
@@ -47,6 +47,8 @@ storage:
     mount_dir: /mnt/outputsynth
 
 env_defaults:
+  # ===== NUM_NODES =====
+  NN: 2
   # ===== GPUS_PER_NODE =====
   # G: 4
   G: 8
@@ -63,17 +65,22 @@ env_defaults:
   # S: 65536
   # S: 131072
   S: 262144
+  # S: 524288
+  # S: 1048576
   # ====== TP / CP =========
-  TP: 4
+  TP: 8
   CP: 2
 
 
 jobs:
-- name: megatron_lm_gpt_G${G}_H${H}_S${S}_TP${TP}_CP${CP}
+- name: megatron_lm_gpt_NN${NN}_G${G}_H${H}_S${S}_TP${TP}_CP${CP}
   sla_tier: premium  # Default: premium
   execution_mode: basic  # Default: basic
+  # sku: ${NN}x80G${G}
+  sku: ${NN}x80G${G}-A100-IB-NvLink
+  # sku: ${NN}x80G${G}-A100-NvLink
   # sku: G1
-  sku: 80G${G}
+  # sku: 80G${G}
   # sku: 80G8
   # sku: 40000000000G8
   # sku: 40G1-A100
@@ -82,9 +89,15 @@ jobs:
   # sku: 80G4-A100-NvLink
   priority: high
   process_count_per_node: 1
+  submit_args:
+    env:
+      NCCL_IB_DISABLE: 0
+      NCCL_DEBUG: INFO
+      NCCL_IB_TIMEOUT: 22
   command:
     - export PATH=$$HOME/.local/bin/:$$PATH
     - export GPUS_PER_NODE=${G}
+    - export NUM_NODES=${NN}
     - export HIDDEN_SIZE=${H}
     - export SEQ_LENGTH=${S}
     - export CP=${CP}
