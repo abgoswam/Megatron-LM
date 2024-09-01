@@ -5,6 +5,8 @@ iter_*
 latest_checkpointed_iteration.txt
 output_logs
 nohup.out
+weights_conversion
+my_long_corpus_llama2
 
 # folder contains preprocessed data.
 my_long_corpus/ 
