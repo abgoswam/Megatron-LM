@@ -2,8 +2,11 @@ description: SSH Singularity
 
 target:
   service: sing
-  name: GenAI-Shared-UKSouth2
-  workspace_name: Singularity-GenAI-WS-UKSouth2
+  # name: GenAI-Shared-UKSouth # G8
+  name: GenAI-Shared-UKSouth2 #G8
+  # name: aims-sing-a100-wus3  # G4
+  workspace_name: synthetic-datagen-ws-wus3
+  # workspace_name: Singularity-GenAI-WS-UKSouth2
 
 environment:
   image: nvidia/pytorch:24.06-py3
@@ -12,6 +15,11 @@ environment:
     - pip list
     - echo 'Above is packages before launch cmd'
     - nvcc --version
+    - echo "export PATH=$$PATH:$$HOME/.local/bin" >> ~/.bashrc && source ~/.bashrc
+    - mkdir -p ~/.cache/huggingface && echo -n "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" > ~/.cache/huggingface/token
+    - pip install gpustat
+    - pip list
+    - ls -lhR
     - echo "setup done"
 
 code:
@@ -32,11 +40,11 @@ storage:
     mount_dir: /mnt/outputsynth
 
 jobs:
-- name: hello_world
+- name: megatron_lm_nvcr_debug_G8
   sla_tier: premium  # Default: premium
   execution_mode: basic  # Default: basic
   # sku: 40000000000G8
-  sku: G8
+  sku: 80G8
   priority: high
   process_count_per_node: 1
   command:
