@@ -1,0 +1,69 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "pretrain_gpt_torchrun",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "/usr/local/bin/torchrun",
+            "justMyCode": false,
+            "console": "integratedTerminal",
+            "env": {
+                "CUDA_DEVICE_MAX_CONNECTIONS": "1",
+                "MASTER_ADDR": "localhost",
+                "MASTER_PORT": "6000",
+                "NUM_NODES": "1",
+                "NODE_RANK": "0",
+                "WORLD_SIZE": "1"
+            },
+            "args": [
+                "${workspaceFolder}/pretrain_gpt.py",
+                "--transformer-impl", "transformer_engine",
+                "--normalization", "RMSNorm",
+                "--num-layers", "24",
+                "--hidden-size", "128",
+                "--num-attention-heads", "16",
+                "--seq-length", "128",
+                "--max-position-embeddings", "128",
+                "--position-embedding-type", "rope",
+                "--rotary-percent", "1.0",
+                "--rotary-base", "1000000",
+                "--swiglu",
+                "--micro-batch-size", "1",
+                "--train-iters", "256",
+                "--weight-decay", "0.1",
+                "--adam-beta1", "0.9",
+                "--adam-beta2", "0.95",
+                "--init-method-std", "0.006",
+                "--clip-grad", "1.0",
+                "--fp16",
+                "--lr", "0.00015",
+                "--lr-decay-style", "cosine",
+                "--min-lr", "6.0e-6",
+                "--lr-warmup-fraction", ".001",
+                "--lr-decay-iters", "256",
+                "--use-flash-attn",
+                "--attention-dropout", "0.1",
+                "--use-distributed-optimizer",
+                "--context-parallel-size", "1",
+                "--tensor-model-parallel-size", "1",
+                "--pipeline-model-parallel-size", "1",
+                "--data-path", "/mnt/synthdatastore/agoswami/my_long_corpus/my_long_corpus_128_gpt2_text_document",
+                "--vocab-file", "./gpt2-vocab.json",
+                "--merge-file", "./gpt2-merges.txt",
+                "--split", "949,50,1",
+                "--log-interval", "100",
+                "--save-interval", "10000",
+                "--eval-interval", "1000",
+                "--save", ".",
+                "--load", ".",
+                "--eval-iters", "0",
+                // "--eval-iters", "10",
+                "--tensorboard-dir", "./tensorboard_logs/001"
+            ]
+        }
+    ]
+}

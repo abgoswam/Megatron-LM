@@ -106,8 +106,7 @@ class DotProductAttention(MegatronModule):
         def log_memory_usage(step: str, prev = 0):
             allocated = torch.cuda.memory_allocated()
             reserved = torch.cuda.memory_reserved()
-            if debug: 
-                print(f"[{step}] Allocated: {allocated / 1024**2:.2f} MB, Reserved: {reserved / 1024**2:.2f} MB, newly allocated: {(allocated - prev) / 1024**2:.2f} MB")
+            if debug: print(f"[{step}] Allocated: {allocated / 1024**2:.2f} MB, Reserved: {reserved / 1024**2:.2f} MB, newly allocated: {(allocated - prev) / 1024**2:.2f} MB")
             return allocated
 
         allocated_so_far = log_memory_usage("Start")
@@ -165,6 +164,29 @@ class DotProductAttention(MegatronModule):
             alpha=(1.0 / self.norm_factor),
         )
 
+        ### From ChatGPT -- making tensors contiguous
+
+        # # Ensure the tensors are contiguous
+        # query_t = query.transpose(0, 1)
+        # key_t = key.transpose(0, 1).transpose(1, 2)
+
+        # # Make tensors contiguous if they are not
+        # if not query_t.is_contiguous():
+        #     query_t = query_t.contiguous()
+
+        # if not key_t.is_contiguous():
+        #     key_t = key_t.contiguous()
+
+        # # Use contiguous tensors in baddbmm
+        # matmul_result = torch.baddbmm(
+        #     matmul_input_buffer,
+        #     query_t,  # [b * np, sq, hn]
+        #     key_t,    # [b * np, hn, sk]
+        #     beta=0.0,
+        #     alpha=(1.0 / self.norm_factor),
+        # )
+        # allocated_so_far = log_memory_usage("After baddbmm", allocated_so_far)
+
         # change view to [b, np, sq, sk]
         attention_scores = matmul_result.view(*output_size)
 
@@ -179,7 +201,7 @@ class DotProductAttention(MegatronModule):
 
         # This is actually dropping out entire tokens to attend to, which might
         # seem a bit unusual, but is taken from the original Transformer paper.
-
+        
         if not self.config.sequence_parallel:
             with tensor_parallel.get_cuda_rng_tracker().fork():
                 attention_probs = self.attention_dropout(attention_probs)
@@ -225,4 +247,10 @@ class DotProductAttention(MegatronModule):
         context = context.view(*new_context_shape)
 
         allocated_so_far= log_memory_usage("End", allocated_so_far)
+
+        # torch.cuda.empty_cache()
+
+        # log_memory_usage("After emptying cache...")
+        print("\n")
+
         return context

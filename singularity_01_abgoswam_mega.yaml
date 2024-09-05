@@ -1,0 +1,63 @@
+description: SSH Singularity
+
+target:
+  service: sing
+  name: aims-sing-a100-wus3 #GenAI-Shared-UKSouth #aims-sing-a100-wus3 #GenAI-Shared-UKSouth
+  workspace_name: synthetic-datagen-ws-wus3 #Singularity-GenAI-WS-UKSouth #synthetic-datagen-ws-wus3
+
+environment:
+  # image: mastervito/pytorch-deepspeed-cu120:20240612
+  # registry: docker.io
+  # -------------
+  image: nvidia/pytorch:24.06-py3
+  registry: nvcr.io
+  # -------------
+  # image: azureml/azureml_dbe70d50f635d0a59c23037292863d55:latest
+  # username: syntheticdatagen1
+  # registry: syntheticdatagen1.azurecr.io
+  # -------------
+  # image_setup:
+  #   - echo "lalala 0819_a" # dummy to start fresh build
+  setup:
+    - pip list
+    - echo 'Above is packages before launch cmd'
+    - nvcc --version
+    - echo "export PATH=$$PATH:$$HOME/.local/bin" >> ~/.bashrc && source ~/.bashrc
+    - mkdir -p ~/.cache/huggingface && echo -n "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" > ~/.cache/huggingface/token
+    - pip install gpustat
+    - pip list
+    - echo "setup done"
+
+code:
+  # local directory of the code. this will be uploaded to the server.
+  # $CONFIG_DIR is expanded to the directory of this config file
+  local_dir: $CONFIG_DIR
+  ignore:
+  - my_long_corpus/*
+
+storage:
+  synthdatastore:
+    storage_account_name: syntheticpipelinewus2
+    container_name: datastore
+    mount_dir: /mnt/synthdatastore
+  outputsynth:
+    storage_account_name: syntheticdatag6275770601
+    container_name: azureml-blobstore-b4c46be1-7692-48a4-afd0-b6734d6c4b67
+    mount_dir: /mnt/outputsynth
+
+env_defaults:
+  # ===== GPUS_PER_NODE =====
+  G: 4
+  # G: 8
+
+jobs:
+- name: megatron_lm_nvcr_debug_G${G}
+  sla_tier: premium  # Default: premium
+  execution_mode: basic  # Default: basic
+  # sku: 80G${G}
+  sku: 40000000000G8
+  priority: high
+  process_count_per_node: 1
+  command:
+    - echo "Hello World"
+    - sleep infinity
