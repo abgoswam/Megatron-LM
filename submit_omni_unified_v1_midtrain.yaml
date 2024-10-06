@@ -34,7 +34,7 @@ storage:
 
 jobs:
 - name: omni_unified_v1_midtrain_gpus${gpus}
-  sla_tier: premium  # Default: premium
+  sla_tier: standard  # Default: premium
   execution_mode: basic  # Default: basic
   sku: 80G${gpus}
   priority: high
@@ -47,8 +47,16 @@ jobs:
     - echo "===================="
     - echo $$AMLT_EXPERIMENT_NAME
     - echo "===================="
+    # Data info.
+    - export DATASET_NAME=agoswami_gpt2_red_pajama # DATASET_NAME must be unique for each dataset.
+    # Processed data
+    - export DATA_DIR_PROCESSED=/mnt/syntheticpipelinetrainerv1/omni_unified_v1/data_mt_processed_gpt2/  # GPT2
+    # - export DATA_DIR_PROCESSED=/mnt/syntheticpipelinetrainerv1/omni_unified_v1/data_mt_processed_phi3/  # Phi3
+    # Job state.
+    - export JOB_PATH=/mnt/syntheticpipelinetrainerv1/omni_unified_v1/jobs_test/$${AMLT_EXPERIMENT_NAME}/
     # Launch the job.
-    - bash ./scripts/run_00_driver_train.sh
+    - bash ./scripts/run_02_midtrain_scalability_gpt2.sh  # GPT2
+    # - bash ./scripts/run_02_midtrain_scalability_phi3.sh  # Phi3
   submit_args:
     env:
       { _AZUREML_SINGULARITY_JOB_UAI: /subscriptions/584bfbd1-d24e-4f7b-81cf-c953a75c45e5/resourcegroups/synthetic-dategen-RG/providers/Microsoft.ManagedIdentity/userAssignedIdentities/genAlign-umi }

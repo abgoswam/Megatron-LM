@@ -4,14 +4,26 @@ set -x #This command turns on debugging by making the shell print each command b
 set -e #This command tells the shell to exit immediately if any command it runs exits with a non-zero status (which usually indicates an error)
 set -u
 
-# VOCAB_FILE=$3 #<Specify path to file>/gpt2-vocab.json
-# MERGE_FILE=$4 #<Specify path to file>/gpt2-merges.txt
+######################################################
+# copy data files into job directory
+mkdir -p ${JOB_PATH}
+
+echo "Copying vocab and merge files files into ${JOB_PATH}"
+cp ${DATA_DIR_PROCESSED}/gpt2-merges.txt ${JOB_PATH}
+cp ${DATA_DIR_PROCESSED}/gpt2-vocab.json ${JOB_PATH}
+
+echo "Copying .bin/.idx files files into ${JOB_PATH}"
+cp -r ${DATA_DIR_PROCESSED}/${DATASET_NAME}/${DATASET_NAME}_text_document.* ${JOB_PATH}
+#######################################################
+
+VOCAB_FILE=${JOB_PATH}/gpt2-vocab.json #<Specify path to file>/gpt2-vocab.json
+MERGE_FILE=${JOB_PATH}/gpt2-merges.txt #<Specify path to file>/gpt2-merges.txt
 
 # TOKENIZER=CL100kBaseBPETokenizer
 # TOKENIZER=GPT4oTokenizer
 TOKENIZER=GPT2BPETokenizer
-DATA_CONFIG_PATH=./examples/tiny_local_phi3/my_long_context_8k_phi3_config.json
-
+# DATA_CONFIG_PATH=./examples/tiny_local_phi3/my_long_context_8k_phi3_config.json
+DATA_PATH=${JOB_PATH}/${DATASET_NAME}_text_document
 
 TP_SIZE=1
 PP_SIZE=1
@@ -41,10 +53,10 @@ TRAIN_ITERS=10000
 
 # MODEL_ROOT=/mnt/std-cache/users/xihlin/tmp/megatron_lm/
 # LOG_ROOT=/data/users/xihlin/tmp/megatron_lm_tb
-DATE=$(date '+%Y-%m-%d')
+# DATE=$(date '+%Y-%m-%d')
 # PROJECT_NAME="${DATE}-phi3min-tp${TP_SIZE}pp${PP_SIZE}-${TOKENS_IN_BILL}b"
-CHECKPOINT_PATH=/mnt/synthdatastore/agoswami/models_04_postlaborday/out_phi3 #<Specify path>
-TENSORBOARD_LOG_PATH=/mnt/synthdatastore/agoswami/models_04_postlaborday/out_phi3/logs #<Specify path>
+CHECKPOINT_PATH=${JOB_PATH}/ckpts #<Specify path>
+TENSORBOARD_LOG_PATH=${JOB_PATH}/logs #<Specify path>
 
 mkdir -p $CHECKPOINT_PATH $TENSORBOARD_LOG_PATH
 
@@ -82,13 +94,13 @@ TRAINING_ARGS=(
     --weight-decay 0.1 
     --adam-beta1 0.9 
     --adam-beta2 0.95 
-    --init-method-std 0.006 
+    --init-method-std 0.01 # originally initializer_range: 0.02, intepret as 95% percentile, so std=0.01
     --clip-grad 1.0 
     --bf16
-    --lr 0.00015 
-    --lr-decay-style cosine 
-    --min-lr 6.0e-6
-    --lr-warmup-fraction .001 
+    --lr 6.0e-4 
+    --lr-decay-style linear  
+    --min-lr 0
+    --lr-warmup-iters 3000 
     --lr-decay-iters $TRAIN_ITERS 
     --use-flash-attn
     --attention-dropout 0.1
@@ -105,9 +117,9 @@ MODEL_PARALLEL_ARGS=(
 )
 
 DATA_ARGS=(
-    --data-path $DATA_CONFIG_PATH 
-    --tokenizer-type $TOKENIZER
-    --num-workers 2
+    --data-path $DATA_PATH 
+    --vocab-file $VOCAB_FILE 
+    --merge-file $MERGE_FILE
     --split 99,1,0
 )
 
