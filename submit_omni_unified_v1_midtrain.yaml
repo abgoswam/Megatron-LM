@@ -2,9 +2,9 @@ description: submit omni_unified_v1_midtrain
 
 target:
   service: sing
-  # name:  aims-sing-a100-wus3
   name:  GenAI-Shared-UKSouth
   # name:  GenAI-Shared-UKSouth2
+  # name:  aims-sing-a100-wus3
   workspace_name: synthetic-datagen-ws-wus3
 
 environment:
@@ -55,8 +55,9 @@ jobs:
     # Job state.
     - export JOB_PATH=/mnt/syntheticpipelinetrainerv1/omni_unified_v1/jobs_test/$${AMLT_EXPERIMENT_NAME}/
     # Launch the job.
-    - bash ./scripts/run_02_midtrain_scalability_gpt2.sh  # GPT2
+    # - bash ./scripts/run_02_midtrain_scalability_gpt2.sh  # GPT2
     # - bash ./scripts/run_02_midtrain_scalability_phi3.sh  # Phi3
+    -  bash ./scripts/run_03_train_gpt3_175b_distributed.sh  # trial
   submit_args:
     env:
       { _AZUREML_SINGULARITY_JOB_UAI: /subscriptions/584bfbd1-d24e-4f7b-81cf-c953a75c45e5/resourcegroups/synthetic-dategen-RG/providers/Microsoft.ManagedIdentity/userAssignedIdentities/genAlign-umi }
