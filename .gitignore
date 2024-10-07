@@ -1,3 +1,7 @@
+.amltconfig
+*.bin
+*.idx
+
 __pycache__
 *.so
 build
