@@ -6,14 +6,15 @@ set -u
 
 ######################################################
 # copy data files into job directory
-mkdir -p ${JOB_PATH}
+# NOTE: for multinode, need to ensure we don't clobber. hence `mkdir -p` and `cp-n` options 
+# mkdir -p ${JOB_PATH}
 
-echo "Copying vocab and merge files files into ${JOB_PATH}"
-cp ${DATA_DIR_PROCESSED}/gpt2-merges.txt ${JOB_PATH}
-cp ${DATA_DIR_PROCESSED}/gpt2-vocab.json ${JOB_PATH}
+# echo "Copying vocab and merge files files into ${JOB_PATH}"
+# cp -n ${DATA_DIR_PROCESSED}/gpt2-merges.txt ${JOB_PATH}
+# cp -n ${DATA_DIR_PROCESSED}/gpt2-vocab.json ${JOB_PATH}
 
-echo "Copying .bin/.idx files files into ${JOB_PATH}"
-cp -r ${DATA_DIR_PROCESSED}/${DATASET_NAME}/${DATASET_NAME}_text_document.* ${JOB_PATH}
+# echo "Copying .bin/.idx files files into ${JOB_PATH}"
+# cp -n ${DATA_DIR_PROCESSED}/${DATASET_NAME}/${DATASET_NAME}_text_document.* ${JOB_PATH}
 #######################################################
 
 VOCAB_FILE=${JOB_PATH}/gpt2-vocab.json #<Specify path to file>/gpt2-vocab.json
@@ -30,7 +31,7 @@ PP_SIZE=1
 # DP_SIZE=$((WORLD_SIZE / (TP_SIZE * PP_SIZE)))
 # TOKENS_PER_GLOBAL_BATCH=$((1024 * 1024 * 4)) # 4M tokens as in phi-3-min
 SEQ_LEN=8192 # 4096 was used in original phi-3-min
-TARGET_GLOBAL_BATCH_SIZE=8
+TARGET_GLOBAL_BATCH_SIZE=$((GPUS_PER_NODE * NUM_NODES))
 # MICRO_BATCH_SIZE=1
 
 
@@ -60,16 +61,20 @@ TENSORBOARD_LOG_PATH=${JOB_PATH}/logs #<Specify path>
 
 mkdir -p $CHECKPOINT_PATH $TENSORBOARD_LOG_PATH
 
-
-GPUS_PER_NODE=8
-NUM_NODES=1
-MASTER_ADDR=localhost
+# GPUS_PER_NODE=8
+# NUM_NODES=1
+MASTER_ADDR=node-0
 MASTER_PORT=6000
+RDZV_ID=f4694954-bb45-495b-9452-789e6028374a
 DISTRIBUTED_ARGS=(
     --nproc_per_node $GPUS_PER_NODE 
     --nnodes $NUM_NODES 
     --master_addr $MASTER_ADDR 
     --master_port $MASTER_PORT
+    --node_rank 0
+    --rdzv_id $RDZV_ID
+    --rdzv_backend c10d
+    --rdzv_endpoint $MASTER_ADDR:$MASTER_PORT
 )
 
 GPT_MODEL_ARGS=(

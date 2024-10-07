@@ -43,33 +43,17 @@ storage:
 
 env_defaults:
   # ===== NUM_NODES =====
-  NN: 1
+  # NN: 1
   # NN: 2
+  # NN: 4
+  NN: 8
   # ===== GPUS_PER_NODE =====
   # G: 4
   G: 8
-  # ====== HIDDEN_SIZE =======
-  # H: 1024
-  H: 3072
-  # ====== SEQ_LENGTH =========
-  # S: 1024
-  # S: 2048
-  S: 4096
-  # S: 8192
-  # S: 16384
-  # S: 32768
-  # S: 65536
-  # S: 131072
-  # S: 262144
-  # S: 524288
-  # S: 1048576
-  # ====== TP / CP =========
-  TP: 1
-  CP: 8
 
 
 jobs:
-- name: omni_unified_v1_midtrain_NN${NN}_G${G}_H${H}_S${S}_TP${TP}_CP${CP}
+- name: omni_unified_v1_midtrain_NN${NN}_G${G}
   sla_tier: standard  # Default: premium
   execution_mode: basic  # Default: basic
   # sku: ${NN}x80G${G}
@@ -97,6 +81,8 @@ jobs:
     - set -e
     - set -u
     - export PATH=$$HOME/.local/bin/:$$PATH
+    - export GPUS_PER_NODE=${G}
+    - export NUM_NODES=${NN}
     - echo "===================="
     - echo $$AMLT_EXPERIMENT_NAME
     - echo "===================="
@@ -106,9 +92,7 @@ jobs:
     - export DATA_DIR_PROCESSED=/mnt/syntheticpipelinetrainerv1/omni_unified_v1/data_mt_processed_gpt2/  # GPT2
     # - export DATA_DIR_PROCESSED=/mnt/syntheticpipelinetrainerv1/omni_unified_v1/data_mt_processed_phi3/  # Phi3
     # Job state.
-    - export JOB_PATH=/mnt/syntheticpipelinetrainerv1/omni_unified_v1/jobs_test/$${AMLT_EXPERIMENT_NAME}/
+    - export JOB_PATH=/mnt/syntheticpipelinetrainerv1/omni_unified_v1/jobs_test/test_NN_${NN}/  
     # Launch the job.
     - bash ./scripts/run_02_midtrain_scalability_gpt2.sh  # GPT2
     # - bash ./scripts/run_02_midtrain_scalability_phi3.sh  # Phi3
-    # -  bash ./scripts/run_03_train_gpt3_175b_distributed.sh  # trial
-    # - bash scripts/abgoswam_mega/run_12.sh
