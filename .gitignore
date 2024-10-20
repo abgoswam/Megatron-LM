@@ -1,3 +1,5 @@
+.amltconfig
+
 __pycache__
 *.so
 build
