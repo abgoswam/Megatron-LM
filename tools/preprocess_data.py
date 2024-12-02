@@ -1,3 +1,10 @@
+import debugpy
+debugpy.listen(5678)  # 5678 is port
+print("Waiting for debugger attach")
+debugpy.wait_for_client()
+debugpy.breakpoint()
+print('break on this line')
+
 # Copyright (c) 2022, NVIDIA CORPORATION. All rights reserved.
 
 """Processing large data for pretraining."""
@@ -203,7 +210,8 @@ def get_args():
                        choices=['BertWordPieceLowerCase','BertWordPieceCase',
                                 'GPT2BPETokenizer', 'SentencePieceTokenizer',
                                 'GPTSentencePieceTokenizer', 'Llama2Tokenizer',
-                                'Llama3Tokenizer', 'MistralTokenizer', 'NullTokenizer'],
+                                'Llama3Tokenizer', 'MistralTokenizer', 'NullTokenizer',
+                                'HuggingFaceTokenizer'],
                        help='What type of tokenizer to use.')
     group.add_argument('--tokenizer-model', type=str, default=None,
                        help='YTTM tokenizer model.')
@@ -269,6 +277,9 @@ def check_files_exist(in_ss_out_names, key, num_partitions):
 
 def main():
     args = get_args()
+
+    print("Display argsuments:")
+    print(json.dumps(vars(args), indent=4))
 
     if args.split_sentences:
         if nltk_available:
